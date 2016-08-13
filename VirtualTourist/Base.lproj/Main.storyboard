@@ -4,15 +4,17 @@
         <deployment identifier="iOS"/>
         <plugIn identifier="com.apple.InterfaceBuilder.IBCocoaTouchPlugin" version="10085"/>
         <capability name="Constraints to layout margins" minToolsVersion="6.0"/>
+        <capability name="Navigation items with more than one left or right bar item" minToolsVersion="7.0"/>
     </dependencies>
     <scenes>
         <!--Collection View Controller-->
         <scene sceneID="7E8-RZ-dSq">
             <objects>
-                <collectionViewController storyboardIdentifier="VTCollectionViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="tud-0C-TW1" customClass="VTCollectionViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
+                <collectionViewController storyboardIdentifier="VTCollectionViewController" modalPresentationStyle="currentContext" useStoryboardIdentifierAsRestorationIdentifier="YES" id="tud-0C-TW1" customClass="VTCollectionViewController" customModule="VirtualTourist" customModuleProvider="target" sceneMemberID="viewController">
                     <collectionView key="view" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" id="gcE-zq-A9Z">
                         <rect key="frame" x="0.0" y="0.0" width="600" height="600"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
+                        <color key="backgroundColor" red="0.7019608021" green="0.7019608021" blue="0.7019608021" alpha="1" colorSpace="calibratedRGB"/>
                         <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="10" minimumInteritemSpacing="10" id="bEF-aj-75i">
                             <size key="itemSize" width="120" height="120"/>
                             <size key="headerReferenceSize" width="0.0" height="0.0"/>
@@ -73,9 +75,19 @@
                                 <action selector="backToMap:" destination="tud-0C-TW1" id="zEi-En-FfS"/>
                             </connections>
                         </barButtonItem>
+                        <rightBarButtonItems>
+                            <barButtonItem systemItem="refresh" id="fkg-2E-E5w">
+                                <connections>
+                                    <action selector="refreshCollection:" destination="tud-0C-TW1" id="Ift-2j-8S9"/>
+                                </connections>
+                            </barButtonItem>
+                            <barButtonItem title="Delete" id="55n-43-0t2"/>
+                        </rightBarButtonItems>
                     </navigationItem>
                     <connections>
+                        <outlet property="deleteButton" destination="55n-43-0t2" id="pbC-C4-Rbx"/>
                         <outlet property="flowLayout" destination="bEF-aj-75i" id="qD8-25-uDF"/>
+                        <outlet property="refreshButton" destination="fkg-2E-E5w" id="p60-uA-NYr"/>
                     </connections>
                 </collectionViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="y3Q-nZ-1Ud" userLabel="First Responder" sceneMemberID="firstResponder"/>

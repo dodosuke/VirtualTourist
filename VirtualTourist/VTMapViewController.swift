@@ -13,6 +13,9 @@ class VTMapViewController: UIViewController, MKMapViewDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
     
+    var lat:Double? = nil
+    var lon:Double? = nil
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -32,6 +35,10 @@ class VTMapViewController: UIViewController, MKMapViewDelegate {
         
         let location = sender.locationInView(mapView)
         let myCoordinate: CLLocationCoordinate2D = mapView.convertPoint(location, toCoordinateFromView: mapView)
+
+        lat = myCoordinate.latitude
+        lon = myCoordinate.longitude
+        print(lat!, lon!)
         let myPin: MKPointAnnotation = MKPointAnnotation()
         
         myPin.coordinate = myCoordinate
@@ -63,12 +70,14 @@ class VTMapViewController: UIViewController, MKMapViewDelegate {
     func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
         
         
-//        if control == view.rightCalloutAccessoryView {
-        
+        if control == view.rightCalloutAccessoryView {
+            
             let collectionViewer = storyboard!.instantiateViewControllerWithIdentifier("VTCollectionViewController") as! VTCollectionViewController
+            collectionViewer.lat = lat
+            collectionViewer.lon = lon
             navigationController?.pushViewController(collectionViewer, animated: true)
             
-//        }
+        }
     }
     
 }

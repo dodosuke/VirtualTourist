@@ -12,10 +12,12 @@ class VTCollectionViewController: UICollectionViewController {
 
     
     @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
+    @IBOutlet weak var deleteButton: UIBarButtonItem!
+    @IBOutlet weak var refreshButton: UIBarButtonItem!
 
     
-    var lat: Double? = 30.00
-    var lon: Double? = 30.00
+    var lat: Double?
+    var lon: Double?
     
     // MARK: Life Cycle
     
@@ -23,6 +25,8 @@ class VTCollectionViewController: UICollectionViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        deleteButton.enabled = false
         
         let space: CGFloat = 3.0
         let dimension: CGFloat = (view.frame.size.width - (2 * space)) / 3.0
@@ -104,10 +108,13 @@ class VTCollectionViewController: UICollectionViewController {
     
     @IBAction func backToMap(sender: AnyObject) {
         
-        
+        navigationController?.popToRootViewControllerAnimated(true)
         
     }
     
+    @IBAction func refreshCollection(sender: AnyObject) {
+        
+    }
     
 }
 
