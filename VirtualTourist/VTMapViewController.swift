@@ -8,13 +8,14 @@
 
 import UIKit
 import MapKit
+import CoreData
 
 class VTMapViewController: UIViewController, MKMapViewDelegate {
     
     @IBOutlet weak var mapView: MKMapView!
     
-    var lat:Double? = nil
-    var lon:Double? = nil
+    var lat:Double?
+    var lon:Double?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -23,8 +24,41 @@ class VTMapViewController: UIViewController, MKMapViewDelegate {
         
         let myLongPress: UILongPressGestureRecognizer = UILongPressGestureRecognizer()
         myLongPress.addTarget(self, action: #selector(VTMapViewController.recognizeLongPress(_:)))
-        
         mapView.addGestureRecognizer(myLongPress)
+        
+        loadDataToMap()
+        
+    }
+    
+    func loadDataToMap() {
+        
+        let delegate: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let stack = delegate.stack
+        let fr = NSFetchRequest(entityName: "Location")
+        fr.returnsObjectsAsFaults = false
+        
+        var locations = []
+        
+        do {
+            let results = try stack.context.executeFetchRequest(fr)
+            if (results.count > 0 ) {
+                locations = results
+            }
+        } catch let error as NSError {
+            print("READ ERROR:\(error.localizedDescription)")
+        }
+        
+        for i in 0...locations.count-1 {
+            
+            let latitude = locations[i].valueForKey("lat") as! Double
+            let longtitude = locations[i].valueForKey("lon") as! Double
+            
+            let myCoordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longtitude)
+            let myPin = MKPointAnnotation()
+            myPin.coordinate = myCoordinate
+            self.mapView.addAnnotation(myPin)
+        }
+        
     }
     
     func recognizeLongPress(sender: UILongPressGestureRecognizer) {
@@ -34,50 +68,23 @@ class VTMapViewController: UIViewController, MKMapViewDelegate {
         }
         
         let location = sender.locationInView(mapView)
-        let myCoordinate: CLLocationCoordinate2D = mapView.convertPoint(location, toCoordinateFromView: mapView)
-
-        lat = myCoordinate.latitude
-        lon = myCoordinate.longitude
-        print(lat!, lon!)
-        let myPin: MKPointAnnotation = MKPointAnnotation()
         
+        let myCoordinate: CLLocationCoordinate2D = mapView.convertPoint(location, toCoordinateFromView: mapView)
+        let myPin: MKPointAnnotation = MKPointAnnotation()
         myPin.coordinate = myCoordinate
-        myPin.title = "Collection"
         mapView.addAnnotation(myPin)
         
+        setLocation(myCoordinate.latitude, lon: myCoordinate.longitude)
+        
     }
     
-    func mapView(mapView: MKMapView, viewForAnnotation annotation: MKAnnotation) -> MKAnnotationView? {
+    func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         
-        let reuseId = "pin"
-        
-        var pinView = mapView.dequeueReusableAnnotationViewWithIdentifier(reuseId) as? MKPinAnnotationView
-        
-        if pinView == nil {
-            pinView = MKPinAnnotationView(annotation: annotation, reuseIdentifier: reuseId)
-            pinView!.canShowCallout = true
-            pinView!.pinTintColor = UIColor.redColor()
-            pinView!.rightCalloutAccessoryView = UIButton(type: .DetailDisclosure)
-        }
-        else {
-            pinView!.annotation = annotation
-        }
-        
-        return pinView
-    }
-    
-    
-    func mapView(mapView: MKMapView, annotationView view: MKAnnotationView, calloutAccessoryControlTapped control: UIControl) {
-        
-        
-        if control == view.rightCalloutAccessoryView {
+        let collectionViewer = storyboard!.instantiateViewControllerWithIdentifier("VTCollectionViewController") as! VTCollectionViewController
+        collectionViewer.lat = view.annotation?.coordinate.latitude
+        collectionViewer.lon = view.annotation?.coordinate.longitude
             
-            let collectionViewer = storyboard!.instantiateViewControllerWithIdentifier("VTCollectionViewController") as! VTCollectionViewController
-            collectionViewer.lat = lat
-            collectionViewer.lon = lon
-            navigationController?.pushViewController(collectionViewer, animated: true)
-            
-        }
+        navigationController?.pushViewController(collectionViewer, animated: true)
     }
     
 }

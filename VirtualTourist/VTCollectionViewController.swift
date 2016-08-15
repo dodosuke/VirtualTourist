@@ -7,6 +7,7 @@
 //
 
 import UIKit
+import CoreData
 
 class VTCollectionViewController: UICollectionViewController {
 
@@ -14,12 +15,10 @@ class VTCollectionViewController: UICollectionViewController {
     @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     @IBOutlet weak var deleteButton: UIBarButtonItem!
     @IBOutlet weak var refreshButton: UIBarButtonItem!
-
     
     var lat: Double?
     var lon: Double?
-    
-    // MARK: Life Cycle
+    var fetchedResultsController: NSFetchedResultsController?
     
     var imageCache = NSCache()
     
@@ -28,13 +27,19 @@ class VTCollectionViewController: UICollectionViewController {
         
         deleteButton.enabled = false
         
+//      For formatting the collection view
         let space: CGFloat = 3.0
         let dimension: CGFloat = (view.frame.size.width - (2 * space)) / 3.0
-        
         flowLayout.minimumInteritemSpacing = space
         flowLayout.minimumLineSpacing = space
         flowLayout.itemSize = CGSizeMake(dimension, dimension)
         
+//        for handling coredata
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let stack = delegate.stack
+        let fr = NSFetchRequest(entityName: "FlickrImages")
+        fr.sortDescriptors = [NSSortDescriptor(key: "image", ascending: true)]
+        fetchedResultsController = NSFetchedResultsController(fetchRequest: fr, managedObjectContext: stack.context, sectionNameKeyPath: nil, cacheName: nil)
     }
     
     override func viewWillDisappear(animated: Bool) {
@@ -53,16 +58,6 @@ class VTCollectionViewController: UICollectionViewController {
         
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("VTCollectionViewCell", forIndexPath: indexPath) as! VTCollectionViewCell
         
-        let methodParameters = [
-            Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod,
-            Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey,
-            Constants.FlickrParameterKeys.BoundingBox: bboxString(),
-            Constants.FlickrParameterKeys.SafeSearch: Constants.FlickrParameterValues.UseSafeSearch,
-            Constants.FlickrParameterKeys.Extras: Constants.FlickrParameterValues.MediumURL,
-            Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat,
-            Constants.FlickrParameterKeys.NoJSONCallback: Constants.FlickrParameterValues.DisableJSONCallback
-        ]
-        
         cell.backgroundColor = UIColor.grayColor()
         
         if let cacheImage = imageCache.objectForKey(indexPath) {
@@ -74,35 +69,25 @@ class VTCollectionViewController: UICollectionViewController {
             cell.activityIndicator.alpha = 1.0
             cell.activityIndicator.startAnimating()
             
-            FlickrClient.sharedInstance().displayImageFromFlickrBySearch(methodParameters) {(image, errorString) in
+            FlickrClient.sharedInstance().displayImageFromFlickrBySearch(lat!, lon:lon!) {(image, errorString) in
                 if errorString == nil {
                     dispatch_async(dispatch_get_main_queue(), {() -> Void in
                         cell.photoImageView.image = image!
                         self.imageCache.setObject(image!, forKey: indexPath)
                         cell.activityIndicator.alpha = 0.0
                         cell.activityIndicator.stopAnimating()
+                        
+//                        let photo = FlickrImages(image: UIImagePNGRepresentation(image!)!, context: self.fetchedResultsController!.managedObjectContext)
+//                        print(photo)
             
                     })
                 } else {
-                    cell.labelForError.text = "Error"
+                    cell.labelForError.text = "No image"
                 }
             }
         }
         
         return cell
-    }
-    
-    private func bboxString() -> String {
-        // ensure bbox is bounded by minimum and maximums
-        if let latitude = lat, let longitude = lon {
-            let minimumLon = max(longitude - Constants.Flickr.SearchBBoxHalfWidth, Constants.Flickr.SearchLonRange.0)
-            let minimumLat = max(latitude - Constants.Flickr.SearchBBoxHalfHeight, Constants.Flickr.SearchLatRange.0)
-            let maximumLon = min(longitude + Constants.Flickr.SearchBBoxHalfWidth, Constants.Flickr.SearchLonRange.1)
-            let maximumLat = min(latitude + Constants.Flickr.SearchBBoxHalfHeight, Constants.Flickr.SearchLatRange.1)
-            return "\(minimumLon),\(minimumLat),\(maximumLon),\(maximumLat)"
-        } else {
-            return "0,0,0,0"
-        }
     }
     
     

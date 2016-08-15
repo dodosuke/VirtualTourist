@@ -10,8 +10,18 @@ import UIKit
 
 class FlickrClient: NSObject {
     
-    func displayImageFromFlickrBySearch(methodParameters: [String:AnyObject], completionHandlerForFlickr: (image: UIImage?, errorString: String?) -> Void) {
-
+    func displayImageFromFlickrBySearch(lat:Double, lon:Double, completionHandlerForFlickr: (image: UIImage?, errorString: String?) -> Void) {
+        
+        let methodParameters = [
+            Constants.FlickrParameterKeys.Method: Constants.FlickrParameterValues.SearchMethod,
+            Constants.FlickrParameterKeys.APIKey: Constants.FlickrParameterValues.APIKey,
+            Constants.FlickrParameterKeys.BoundingBox: bboxString(lat, lon:lon),
+            Constants.FlickrParameterKeys.SafeSearch: Constants.FlickrParameterValues.UseSafeSearch,
+            Constants.FlickrParameterKeys.Extras: Constants.FlickrParameterValues.MediumURL,
+            Constants.FlickrParameterKeys.Format: Constants.FlickrParameterValues.ResponseFormat,
+            Constants.FlickrParameterKeys.NoJSONCallback: Constants.FlickrParameterValues.DisableJSONCallback
+        ]
+        
         // create session and request
         let session = NSURLSession.sharedSession()
         let request = NSURLRequest(URL: flickrURLFromParameters(methodParameters))
@@ -98,7 +108,18 @@ class FlickrClient: NSObject {
         task.resume()
     }
     
-
+    private func bboxString(lat:Double?, lon:Double?) -> String {
+        // ensure bbox is bounded by minimum and maximums
+        if let latitude = lat, let longitude = lon {
+            let minimumLon = max(longitude - Constants.Flickr.SearchBBoxHalfWidth, Constants.Flickr.SearchLonRange.0)
+            let minimumLat = max(latitude - Constants.Flickr.SearchBBoxHalfHeight, Constants.Flickr.SearchLatRange.0)
+            let maximumLon = min(longitude + Constants.Flickr.SearchBBoxHalfWidth, Constants.Flickr.SearchLonRange.1)
+            let maximumLat = min(latitude + Constants.Flickr.SearchBBoxHalfHeight, Constants.Flickr.SearchLatRange.1)
+            return "\(minimumLon),\(minimumLat),\(maximumLon),\(maximumLat)"
+        } else {
+            return "0,0,0,0"
+        }
+    }
     
     private func flickrURLFromParameters(parameters: [String:AnyObject]) -> NSURL {
         

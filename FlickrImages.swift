@@ -12,6 +12,13 @@ import CoreData
 
 class FlickrImages: NSManagedObject {
 
-// Insert code here to add functionality to your managed object subclass
+    convenience init (image: NSData, context: NSManagedObjectContext) {
+        if let ent = NSEntityDescription.entityForName("FlickrImages", inManagedObjectContext: context){
+            self.init(entity:ent, insertIntoManagedObjectContext: context)
+            self.image = image
+        }else {
+            fatalError("")
+        }
+    }
 
 }
