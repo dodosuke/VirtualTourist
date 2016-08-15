@@ -15,7 +15,7 @@ extension VTMapViewController {
     func setLocation(lat: Double, lon: Double) {
         
         // Get the stack
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let delegate:AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let stack = delegate.stack
         let fr = NSFetchRequest(entityName: "Location")
         fr.sortDescriptors = [NSSortDescriptor(key: "lat", ascending: true), NSSortDescriptor(key: "lon", ascending: true)]
@@ -29,6 +29,65 @@ extension VTMapViewController {
         
         stack.save()
         
+    }
+    
+    func loadLocations() {
+        
+        let delegate: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let stack = delegate.stack
+        let fr = NSFetchRequest(entityName: "Location")
+        fr.returnsObjectsAsFaults = false
+        
+        do {
+            let results: Array = try stack.context.executeFetchRequest(fr)
+            if results.count > 0  {
+                
+                for i in 0...results.count-1 {
+                    
+                    let latitude = results[i].valueForKey("lat") as! Double
+                    let longtitude = results[i].valueForKey("lon") as! Double
+                    
+                    let myCoordinate = CLLocationCoordinate2D(latitude: latitude, longitude: longtitude)
+                    let myPin = MKPointAnnotation()
+                    myPin.coordinate = myCoordinate
+                    self.mapView.addAnnotation(myPin)
+                }
+            }
+        } catch let error as NSError {
+            print("READ ERROR:\(error.localizedDescription)")
+        }
+        
+
+        
+    }
+    
+    func deleteLocation(lat: Double, lon: Double) {
+        
+        let delegate: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let stack = delegate.stack
+        let fr = NSFetchRequest(entityName: "Location")
+        fr.returnsObjectsAsFaults = false
+        
+        do {
+            let results: Array = try stack.context.executeFetchRequest(fr)
+            if results.count > 0 {
+                
+                for i in 0...results.count-1 {
+                    
+                    let latitude = results[i].valueForKey("lat") as! Double
+                    let longtitude = results[i].valueForKey("lon") as! Double
+                    
+                    if latitude == lat && longtitude == lon {
+                        
+                        stack.context.deleteObject(results[i] as! NSManagedObject)
+                        stack.save()
+        
+                    }
+                }
+            }
+        } catch let error as NSError {
+            print("FETCH ERROR:\(error.localizedDescription)")
+        }
     }
     
 
