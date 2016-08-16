@@ -19,14 +19,13 @@ extension VTCollectionViewController {
         fr.sortDescriptors = [NSSortDescriptor(key: "image", ascending: true)]
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fr, managedObjectContext: stack.context, sectionNameKeyPath: nil, cacheName: nil)
         
-        let photo = FlickrImages(image: UIImagePNGRepresentation(image!)!, location:location, context: fetchedResultsController.managedObjectContext)
-        print(photo)
+        let _ = FlickrImages(image: UIImagePNGRepresentation(image!)!, location:location, context: fetchedResultsController.managedObjectContext)
         
         stack.save()
         
     }
     
-    func getPhotos(location: Location) -> [FlickrImages]? {
+    func getPhotos(location: Location) -> [FlickrImages] {
         
         let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let stack = delegate.stack
@@ -45,7 +44,28 @@ extension VTCollectionViewController {
             print("READ ERROR:\(error.localizedDescription)")
         }
         
-        return nil
+        return []
+        
+    }
+    
+    func deletePhoto(photos: [FlickrImages]) {
+        
+        let delegate: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let stack = delegate.stack
+        let fr = NSFetchRequest(entityName: "FlickrImages")
+        fr.returnsObjectsAsFaults = false
+        
+        do {
+            let results: Array = try stack.context.executeFetchRequest(fr)
+            if results.count > 0 {
+                for photo in photos {
+                    stack.context.deleteObject(photo)
+                    stack.save()
+                }
+            }
+        } catch let error as NSError {
+            print("FETCH ERROR:\(error.localizedDescription)")
+        }
         
     }
     

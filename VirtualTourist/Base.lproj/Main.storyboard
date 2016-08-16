@@ -39,15 +39,6 @@
                                     <constraint firstAttribute="height" constant="128" id="lrr-FI-OwE"/>
                                 </constraints>
                             </mapView>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="New Collection" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XwN-Sc-tCP">
-                                <rect key="frame" x="0.0" y="556" width="600" height="44"/>
-                                <constraints>
-                                    <constraint firstAttribute="height" constant="44" id="gzd-Dq-BiN"/>
-                                </constraints>
-                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
-                                <color key="textColor" red="0.0" green="0.50196081400000003" blue="1" alpha="1" colorSpace="calibratedRGB"/>
-                                <nil key="highlightedColor"/>
-                            </label>
                             <collectionView clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="scaleToFill" dataMode="prototypes" translatesAutoresizingMaskIntoConstraints="NO" id="4u2-zV-ecK">
                                 <rect key="frame" x="0.0" y="189" width="600" height="359"/>
                                 <color key="backgroundColor" red="0.90196079019999997" green="0.90196079019999997" blue="0.90196079019999997" alpha="1" colorSpace="calibratedRGB"/>
@@ -98,19 +89,30 @@
                                     </collectionViewCell>
                                 </cells>
                             </collectionView>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="rkD-jg-9gN">
+                                <rect key="frame" x="0.0" y="556" width="600" height="44"/>
+                                <constraints>
+                                    <constraint firstAttribute="height" constant="44" id="zSn-kf-zA4"/>
+                                </constraints>
+                                <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                <state key="normal" title="New Collection"/>
+                                <connections>
+                                    <action selector="pressCollectionButton:" destination="7FT-AA-tm5" eventType="touchUpInside" id="fDu-RL-1bj"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" white="1" alpha="1" colorSpace="calibratedWhite"/>
                         <constraints>
-                            <constraint firstItem="vPC-IO-ZEm" firstAttribute="top" secondItem="XwN-Sc-tCP" secondAttribute="bottom" id="Da9-Uk-2Ot"/>
+                            <constraint firstItem="rkD-jg-9gN" firstAttribute="centerX" secondItem="R7I-Fq-PjH" secondAttribute="centerX" id="9Uh-4d-UcP"/>
                             <constraint firstItem="vPC-IO-ZEm" firstAttribute="top" secondItem="4u2-zV-ecK" secondAttribute="bottom" constant="52" id="FYh-xP-NdE"/>
-                            <constraint firstItem="XwN-Sc-tCP" firstAttribute="centerX" secondItem="R7I-Fq-PjH" secondAttribute="centerX" id="Hnz-St-zhT"/>
                             <constraint firstItem="4u2-zV-ecK" firstAttribute="top" secondItem="8le-8x-Yss" secondAttribute="bottom" constant="125" id="MAb-f8-IhI"/>
+                            <constraint firstItem="rkD-jg-9gN" firstAttribute="width" secondItem="R7I-Fq-PjH" secondAttribute="width" id="MSX-i5-luH"/>
                             <constraint firstItem="4u2-zV-ecK" firstAttribute="width" secondItem="R7I-Fq-PjH" secondAttribute="width" id="OYS-bO-QF8"/>
                             <constraint firstItem="awd-CF-ef0" firstAttribute="top" secondItem="8le-8x-Yss" secondAttribute="bottom" id="XXb-Hg-5He"/>
                             <constraint firstItem="4u2-zV-ecK" firstAttribute="centerX" secondItem="R7I-Fq-PjH" secondAttribute="centerX" id="bQV-n3-aea"/>
                             <constraint firstItem="awd-CF-ef0" firstAttribute="width" secondItem="R7I-Fq-PjH" secondAttribute="width" id="efr-1O-3kF"/>
                             <constraint firstItem="awd-CF-ef0" firstAttribute="centerX" secondItem="R7I-Fq-PjH" secondAttribute="centerX" id="oft-5h-0u5"/>
-                            <constraint firstItem="XwN-Sc-tCP" firstAttribute="width" secondItem="R7I-Fq-PjH" secondAttribute="width" id="peb-W3-g4A"/>
+                            <constraint firstItem="vPC-IO-ZEm" firstAttribute="top" secondItem="rkD-jg-9gN" secondAttribute="bottom" id="tJK-fw-ABF"/>
                         </constraints>
                     </view>
                     <navigationItem key="navigationItem" id="HON-nR-c24">
@@ -119,14 +121,12 @@
                                 <action selector="backToMap:" destination="7FT-AA-tm5" id="Nt2-7t-sOP"/>
                             </connections>
                         </barButtonItem>
-                        <barButtonItem key="rightBarButtonItem" title="Delete" id="BQ4-xa-WrU"/>
                     </navigationItem>
                     <connections>
+                        <outlet property="collectionButton" destination="rkD-jg-9gN" id="LW9-X2-UcF"/>
                         <outlet property="collectionView" destination="4u2-zV-ecK" id="pof-lQ-dyJ"/>
-                        <outlet property="deleteButton" destination="BQ4-xa-WrU" id="s2n-NJ-QQB"/>
                         <outlet property="flowLayout" destination="QKB-nZ-f5z" id="PGc-lM-FFC"/>
                         <outlet property="mapView" destination="awd-CF-ef0" id="ccl-5F-Z5b"/>
-                        <outlet property="newCollectionLabel" destination="XwN-Sc-tCP" id="mnJ-4y-mea"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="JZ7-gb-yXO" userLabel="First Responder" sceneMemberID="firstResponder"/>

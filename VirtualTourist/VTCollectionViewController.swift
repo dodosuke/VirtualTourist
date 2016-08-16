@@ -14,10 +14,9 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
 
     
     @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
-    @IBOutlet weak var deleteButton: UIBarButtonItem!
-    @IBOutlet weak var newCollectionLabel: UILabel!
     @IBOutlet weak var collectionView: UICollectionView!
     @IBOutlet weak var mapView: MKMapView!
+    @IBOutlet weak var collectionButton: UIButton!
     
     
     var lat: Double?
@@ -26,7 +25,8 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
     var location: Location?
     
     var imageCache = NSCache()
-    var photos: [FlickrImages]?
+    var photos: [FlickrImages] = []
+    var selectedCells:[Bool] = []
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -34,12 +34,17 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
         lat = myPin!.coordinate.latitude
         lon = myPin!.coordinate.longitude
 
-        deleteButton.enabled = false
         collectionView.delegate = self
         collectionView.dataSource = self
+        collectionView.allowsMultipleSelection = true
         mapView.delegate = self
         
         photos = getPhotos(location!)
+        if photos != [] {
+            selectedCells = [Bool](count:photos.count, repeatedValue:false)
+        } else {
+            selectedCells = [Bool](count:21, repeatedValue:false)
+        }
         
 //      For formatting the collection view
         let space: CGFloat = 3.0
@@ -50,8 +55,8 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
         
 //      For mapview
         let myCoordinate = myPin!.coordinate
-        let myLatDist : CLLocationDistance = 400
-        let myLonDist : CLLocationDistance = 400
+        let myLatDist : CLLocationDistance = 1000
+        let myLonDist : CLLocationDistance = 1000
         let myRegion: MKCoordinateRegion = MKCoordinateRegionMakeWithDistance(myCoordinate, myLatDist, myLonDist);
         mapView.setRegion(myRegion, animated: true)
         mapView.addAnnotation(myPin!)
@@ -61,10 +66,10 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        if photos == nil {
+        if photos == [] {
             return 21
         } else {
-            return photos!.count
+            return photos.count
         }
         
     }
@@ -73,7 +78,7 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
         
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("VTCollectionViewCell", forIndexPath: indexPath) as! VTCollectionViewCell
         
-        if photos == nil {
+        if photos == [] {
             
             if let cacheImage = imageCache.objectForKey(indexPath) {
                 if let _ = cell.photoImageView.image {
@@ -94,6 +99,7 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
                             cell.activityIndicator.stopAnimating()
                             
                             self.storePhotos(image, location: self.location!)
+                            self.photos = self.getPhotos(self.location!)
                             
                         })
                     } else {
@@ -106,12 +112,53 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
             
         } else {
             
-            let flickrImage = photos![indexPath.row] 
+            let flickrImage = photos[indexPath.row]
             cell.photoImageView.image = UIImage(data: flickrImage.image!)
+            
+            if selectedCells[indexPath.row] == true {
+                cell.alpha = 0.5
+            } else {
+                cell.alpha = 1.0
+            }
+            
             return cell
             
         }
+        
+    }
+    
+    func collectionView(collectionView: UICollectionView, didSelectItemAtIndexPath indexPath: NSIndexPath) {
+        
+        selectCells(collectionView, indexPath: indexPath)
 
+    }
+    
+    
+    func collectionView(collectionView: UICollectionView, didDeselectItemAtIndexPath indexPath: NSIndexPath) {
+        
+        selectCells(collectionView, indexPath: indexPath)
+        
+    }
+    
+    func selectCells(collectionView: UICollectionView, indexPath: NSIndexPath) {
+        
+        selectedCells[indexPath.row] = !selectedCells[indexPath.row]
+        
+        print(photos.count)
+        if selectedCells == [Bool](count:photos.count, repeatedValue:false) {
+            collectionButton.setTitle("New Collection", forState: .Normal)
+        } else {
+            collectionButton.setTitle("Remove Selected Photo(s)", forState: .Normal)
+        }
+        
+        let cell = collectionView.cellForItemAtIndexPath(indexPath)!
+        
+        if selectedCells[indexPath.row] == true {
+            cell.alpha = 0.5
+        } else {
+            cell.alpha = 1.0
+        }
+        
     }
     
     
@@ -120,6 +167,33 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
         navigationController?.popToRootViewControllerAnimated(true)
         
     }
+    
+    @IBAction func pressCollectionButton(sender: AnyObject) {
+        
+        var photosForDelete: [FlickrImages] = []
+        
+        if collectionButton.titleLabel!.text == "New Collection" {
+            photosForDelete = photos
+        } else if collectionButton.titleLabel!.text == "Remove Selected Photo(s)" {
+            for i in 0...photos.count-1 {
+                if selectedCells[i] {
+                    photosForDelete.append(photos[i])
+                }
+            }
+        }
+        
+        deletePhoto(photosForDelete)
+        
+        photos = getPhotos(location!)
+        selectedCells = [Bool](count:photos.count, repeatedValue:false)
+        collectionButton.setTitle("New Collection", forState: .Normal)
+        collectionView.reloadData()
+        
+    }
+    
+    
+    
+
     
     
 }
