@@ -7,10 +7,10 @@
     <entity name="Location" representedClassName=".Location" syncable="YES">
         <attribute name="lat" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
         <attribute name="lon" optional="YES" attributeType="Double" defaultValueString="0.0" syncable="YES"/>
-        <relationship name="collection" optional="YES" maxCount="1" deletionRule="Cascade" destinationEntity="FlickrImages" inverseName="photos" inverseEntity="FlickrImages" syncable="YES"/>
+        <relationship name="collection" optional="YES" toMany="YES" deletionRule="Cascade" ordered="YES" destinationEntity="FlickrImages" inverseName="photos" inverseEntity="FlickrImages" syncable="YES"/>
     </entity>
     <elements>
         <element name="FlickrImages" positionX="-54" positionY="9" width="128" height="75"/>
-        <element name="Location" positionX="-254" positionY="45" width="128" height="88"/>
+        <element name="Location" positionX="-254" positionY="45" width="128" height="90"/>
     </elements>
 </model>

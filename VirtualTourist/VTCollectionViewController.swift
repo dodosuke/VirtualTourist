@@ -23,18 +23,23 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
     var lat: Double?
     var lon: Double?
     var myPin: MKAnnotation?
-    var fetchedResultsController: NSFetchedResultsController?
+    var location: Location?
     
     var imageCache = NSCache()
+    var photos: [FlickrImages]?
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        lat = myPin!.coordinate.latitude
+        lon = myPin!.coordinate.longitude
 
         deleteButton.enabled = false
         collectionView.delegate = self
         collectionView.dataSource = self
         mapView.delegate = self
+        
+        photos = getPhotos(location!)
         
 //      For formatting the collection view
         let space: CGFloat = 3.0
@@ -56,43 +61,57 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        return 21
+        if photos == nil {
+            return 21
+        } else {
+            return photos!.count
+        }
+        
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("VTCollectionViewCell", forIndexPath: indexPath) as! VTCollectionViewCell
         
-        cell.backgroundColor = UIColor.grayColor()
-        
-        if let cacheImage = imageCache.objectForKey(indexPath) {
-            if let _ = cell.photoImageView.image {
-                cell.photoImageView.image = cacheImage as? UIImage
-            }
-        } else {
+        if photos == nil {
             
-            cell.activityIndicator.alpha = 1.0
-            cell.activityIndicator.startAnimating()
-            
-            FlickrClient.sharedInstance().displayImageFromFlickrBySearch(lat!, lon:lon!) {(image, errorString) in
-                print("fff")
-                if errorString == nil {
-                    dispatch_async(dispatch_get_main_queue(), {() -> Void in
-                        cell.photoImageView.image = image!
-                        self.imageCache.setObject(image!, forKey: indexPath)
-                        cell.activityIndicator.alpha = 0.0
-                        cell.activityIndicator.stopAnimating()
-                        
-                        self.getPhotos(image)
-            
-                    })
-                } else {
-                    cell.labelForError.text = "No image"
+            if let cacheImage = imageCache.objectForKey(indexPath) {
+                if let _ = cell.photoImageView.image {
+                    cell.photoImageView.image = cacheImage as? UIImage
+                }
+            } else {
+                
+                cell.activityIndicator.alpha = 1.0
+                cell.activityIndicator.startAnimating()
+                
+                FlickrClient.sharedInstance().displayImageFromFlickrBySearch(lat!, lon:lon!) {(image, errorString) in
+                    if errorString == nil {
+                        dispatch_async(dispatch_get_main_queue(), {() -> Void in
+                            cell.photoImageView.image = image!
+                            self.imageCache.setObject(image!, forKey: indexPath)
+                            
+                            cell.activityIndicator.alpha = 0.0
+                            cell.activityIndicator.stopAnimating()
+                            
+                            self.storePhotos(image, location: self.location!)
+                            
+                        })
+                    } else {
+                        cell.labelForError.text = "No image"
+                    }
                 }
             }
+            
+            return cell
+            
+        } else {
+            
+            let flickrImage = photos![indexPath.row] 
+            cell.photoImageView.image = UIImage(data: flickrImage.image!)
+            return cell
+            
         }
-        
-        return cell
+
     }
     
     

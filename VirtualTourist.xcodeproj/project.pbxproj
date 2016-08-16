@@ -71,6 +71,7 @@
 		C6EB2F181D5EA2A0006C9E04 /* FlickrImages.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = FlickrImages.swift; path = ../FlickrImages.swift; sourceTree = "<group>"; };
 		C6F7FCC31D6107A200611729 /* CoreDataMapVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataMapVC.swift; sourceTree = "<group>"; };
 		C6F7FCC61D62000500611729 /* CoreDataCollectionVC.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreDataCollectionVC.swift; sourceTree = "<group>"; };
+		C6FE33B11D62AA2B00D281E6 /* DataModel 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "DataModel 2.xcdatamodel"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -585,9 +586,10 @@
 		C6EB2F0C1D5B457C006C9E04 /* DataModel.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				C6FE33B11D62AA2B00D281E6 /* DataModel 2.xcdatamodel */,
 				C6EB2F0D1D5B457C006C9E04 /* DataModel.xcdatamodel */,
 			);
-			currentVersion = C6EB2F0D1D5B457C006C9E04 /* DataModel.xcdatamodel */;
+			currentVersion = C6FE33B11D62AA2B00D281E6 /* DataModel 2.xcdatamodel */;
 			path = DataModel.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;

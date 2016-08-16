@@ -12,10 +12,11 @@ import CoreData
 
 class FlickrImages: NSManagedObject {
 
-    convenience init (image: NSData, context: NSManagedObjectContext) {
+    convenience init (image: NSData, location: Location, context: NSManagedObjectContext) {
         if let ent = NSEntityDescription.entityForName("FlickrImages", inManagedObjectContext: context){
             self.init(entity:ent, insertIntoManagedObjectContext: context)
             self.image = image
+            self.photos = location
         } else {
             fatalError("")
         }

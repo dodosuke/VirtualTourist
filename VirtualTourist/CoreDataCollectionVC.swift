@@ -11,16 +11,41 @@ import CoreData
 
 extension VTCollectionViewController {
     
-    func getPhotos(image: UIImage?) {
+    func storePhotos(image: UIImage?, location: Location) {
         
         let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let stack = delegate.stack
         let fr = NSFetchRequest(entityName: "FlickrImages")
         fr.sortDescriptors = [NSSortDescriptor(key: "image", ascending: true)]
-        fetchedResultsController = NSFetchedResultsController(fetchRequest: fr, managedObjectContext: stack.context, sectionNameKeyPath: nil, cacheName: nil)
+        let fetchedResultsController = NSFetchedResultsController(fetchRequest: fr, managedObjectContext: stack.context, sectionNameKeyPath: nil, cacheName: nil)
         
-        let photo = FlickrImages(image: UIImagePNGRepresentation(image!)!, context: fetchedResultsController!.managedObjectContext)
+        let photo = FlickrImages(image: UIImagePNGRepresentation(image!)!, location:location, context: fetchedResultsController.managedObjectContext)
         print(photo)
+        
+        stack.save()
+        
+    }
+    
+    func getPhotos(location: Location) -> [FlickrImages]? {
+        
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let stack = delegate.stack
+        let fr = NSFetchRequest(entityName: "FlickrImages")
+        fr.predicate = NSPredicate(format: "photos = %@", argumentArray: [location])
+        
+        do {
+            let results: Array = try stack.context.executeFetchRequest(fr)
+            if results.count > 0  {
+                
+                let photos = results as! [FlickrImages]
+                return photos
+                
+            }
+        } catch let error as NSError {
+            print("READ ERROR:\(error.localizedDescription)")
+        }
+        
+        return nil
         
     }
     

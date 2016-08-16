@@ -52,10 +52,13 @@ class VTMapViewController: UIViewController, MKMapViewDelegate {
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
         
+        let location:Location = findLocation(view.annotation!.coordinate.latitude, lon: view.annotation!.coordinate.longitude)!
+        
         if editMode {
-            deletePin(view)
+            mapView.removeAnnotation(view.annotation!)
+            deleteLocation(location)
         } else {
-            recallCollectionView(view)
+            recallCollectionView(view, location: location)
         }
 
     }
@@ -73,22 +76,14 @@ class VTMapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    
-    private func deletePin(view: MKAnnotationView) {
-        
-        let myPin = view.annotation!
-        mapView.removeAnnotation(myPin)
-        deleteLocation(myPin.coordinate.latitude, lon: myPin.coordinate.longitude)
-        
-    }
-    
-    private func recallCollectionView(view: MKAnnotationView) {
+    private func recallCollectionView(view: MKAnnotationView, location: Location) {
         
         let myPin = view.annotation!
         let collectionViewer = storyboard!.instantiateViewControllerWithIdentifier("VTCollectionViewController") as! VTCollectionViewController
+        
         collectionViewer.myPin = myPin
-        collectionViewer.lat = myPin.coordinate.latitude
-        collectionViewer.lon = myPin.coordinate.longitude
+        collectionViewer.location = location
+        
         navigationController?.pushViewController(collectionViewer, animated: true)
         
     }

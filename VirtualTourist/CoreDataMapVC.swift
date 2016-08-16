@@ -59,7 +59,7 @@ extension VTMapViewController {
         
     }
     
-    func deleteLocation(lat: Double, lon: Double) {
+    func findLocation(lat: Double, lon: Double) -> Location? {
         
         let delegate: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let stack = delegate.stack
@@ -77,29 +77,36 @@ extension VTMapViewController {
                     
                     if latitude == lat && longtitude == lon {
                         
-                        stack.context.deleteObject(results[i] as! NSManagedObject)
-                        stack.save()
-        
+                        let location = results[i] as! Location
+                        return location
+                        
                     }
                 }
             }
         } catch let error as NSError {
             print("FETCH ERROR:\(error.localizedDescription)")
         }
-    }
-    
-    func getPhotos() {
         
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        let stack = delegate.stack
-        let fr = NSFetchRequest(entityName: "FlickrImages")
-        fr.sortDescriptors = [NSSortDescriptor(key: "image", ascending: true)]
-//        fr.predicate = NSPredicate(format: "photos = %@", argumentArray: [Location])
-    
-    
+        return nil
+
     }
     
-    
-
+    func deleteLocation(location: Location) {
+        
+        let delegate: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let stack = delegate.stack
+        let fr = NSFetchRequest(entityName: "Location")
+        fr.returnsObjectsAsFaults = false
+        
+        do {
+            let results: Array = try stack.context.executeFetchRequest(fr)
+            if results.count > 0 {
+                stack.context.deleteObject(location)
+                stack.save()
+            }
+        } catch let error as NSError {
+            print("FETCH ERROR:\(error.localizedDescription)")
+        }
+    }
     
 }
