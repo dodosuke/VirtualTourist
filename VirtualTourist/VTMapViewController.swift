@@ -86,6 +86,7 @@ class VTMapViewController: UIViewController, MKMapViewDelegate {
         
         let myPin = view.annotation!
         let collectionViewer = storyboard!.instantiateViewControllerWithIdentifier("VTCollectionViewController") as! VTCollectionViewController
+        collectionViewer.myPin = myPin
         collectionViewer.lat = myPin.coordinate.latitude
         collectionViewer.lon = myPin.coordinate.longitude
         navigationController?.pushViewController(collectionViewer, animated: true)

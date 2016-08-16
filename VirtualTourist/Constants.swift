@@ -64,9 +64,4 @@ struct Constants {
         static let OKStatus = "ok"
     }
     
-    enum Method {
-        case PAGE
-        case IMAGE
-    }
-    
 }

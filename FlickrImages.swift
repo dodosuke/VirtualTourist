@@ -16,7 +16,7 @@ class FlickrImages: NSManagedObject {
         if let ent = NSEntityDescription.entityForName("FlickrImages", inManagedObjectContext: context){
             self.init(entity:ent, insertIntoManagedObjectContext: context)
             self.image = image
-        }else {
+        } else {
             fatalError("")
         }
     }

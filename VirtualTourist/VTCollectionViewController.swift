@@ -7,17 +7,22 @@
 //
 
 import UIKit
+import MapKit
 import CoreData
 
-class VTCollectionViewController: UICollectionViewController {
+class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource, MKMapViewDelegate {
 
     
     @IBOutlet weak var flowLayout: UICollectionViewFlowLayout!
     @IBOutlet weak var deleteButton: UIBarButtonItem!
-    @IBOutlet weak var refreshButton: UIBarButtonItem!
+    @IBOutlet weak var newCollectionLabel: UILabel!
+    @IBOutlet weak var collectionView: UICollectionView!
+    @IBOutlet weak var mapView: MKMapView!
+    
     
     var lat: Double?
     var lon: Double?
+    var myPin: MKAnnotation?
     var fetchedResultsController: NSFetchedResultsController?
     
     var imageCache = NSCache()
@@ -25,7 +30,11 @@ class VTCollectionViewController: UICollectionViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
+
         deleteButton.enabled = false
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        mapView.delegate = self
         
 //      For formatting the collection view
         let space: CGFloat = 3.0
@@ -34,27 +43,23 @@ class VTCollectionViewController: UICollectionViewController {
         flowLayout.minimumLineSpacing = space
         flowLayout.itemSize = CGSizeMake(dimension, dimension)
         
-//        for handling coredata
-        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
-        let stack = delegate.stack
-        let fr = NSFetchRequest(entityName: "FlickrImages")
-        fr.sortDescriptors = [NSSortDescriptor(key: "image", ascending: true)]
-        fetchedResultsController = NSFetchedResultsController(fetchRequest: fr, managedObjectContext: stack.context, sectionNameKeyPath: nil, cacheName: nil)
-    }
-    
-    override func viewWillDisappear(animated: Bool) {
-        super.viewWillDisappear(animated)
-        
-        unsubscribeFromAllNotifications()
+//      For mapview
+        let myCoordinate = myPin!.coordinate
+        let myLatDist : CLLocationDistance = 400
+        let myLonDist : CLLocationDistance = 400
+        let myRegion: MKCoordinateRegion = MKCoordinateRegionMakeWithDistance(myCoordinate, myLatDist, myLonDist);
+        mapView.setRegion(myRegion, animated: true)
+        mapView.addAnnotation(myPin!)
+
     }
     
     
-    override func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
+    func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
         return 21
     }
     
-    override func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
+    func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
         
         let cell = collectionView.dequeueReusableCellWithReuseIdentifier("VTCollectionViewCell", forIndexPath: indexPath) as! VTCollectionViewCell
         
@@ -70,6 +75,7 @@ class VTCollectionViewController: UICollectionViewController {
             cell.activityIndicator.startAnimating()
             
             FlickrClient.sharedInstance().displayImageFromFlickrBySearch(lat!, lon:lon!) {(image, errorString) in
+                print("fff")
                 if errorString == nil {
                     dispatch_async(dispatch_get_main_queue(), {() -> Void in
                         cell.photoImageView.image = image!
@@ -77,8 +83,7 @@ class VTCollectionViewController: UICollectionViewController {
                         cell.activityIndicator.alpha = 0.0
                         cell.activityIndicator.stopAnimating()
                         
-//                        let photo = FlickrImages(image: UIImagePNGRepresentation(image!)!, context: self.fetchedResultsController!.managedObjectContext)
-//                        print(photo)
+                        self.getPhotos(image)
             
                     })
                 } else {
@@ -97,29 +102,10 @@ class VTCollectionViewController: UICollectionViewController {
         
     }
     
-    @IBAction func refreshCollection(sender: AnyObject) {
-        
-    }
     
 }
 
 
-// MARK: - ViewController (Notifications)
-
-extension VTCollectionViewController {
-    
-    private func subscribeToNotification(notification: String, selector: Selector) {
-        NSNotificationCenter.defaultCenter().addObserver(self, selector: selector, name: notification, object: nil)
-    }
-    
-    private func unsubscribeFromAllNotifications() {
-        NSNotificationCenter.defaultCenter().removeObserver(self)
-    }
-}
-
-extension VTCollectionViewController {
-    
-}
 
 
 

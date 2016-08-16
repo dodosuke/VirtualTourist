@@ -57,8 +57,6 @@ extension VTMapViewController {
             print("READ ERROR:\(error.localizedDescription)")
         }
         
-
-        
     }
     
     func deleteLocation(lat: Double, lon: Double) {
@@ -89,6 +87,18 @@ extension VTMapViewController {
             print("FETCH ERROR:\(error.localizedDescription)")
         }
     }
+    
+    func getPhotos() {
+        
+        let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
+        let stack = delegate.stack
+        let fr = NSFetchRequest(entityName: "FlickrImages")
+        fr.sortDescriptors = [NSSortDescriptor(key: "image", ascending: true)]
+//        fr.predicate = NSPredicate(format: "photos = %@", argumentArray: [Location])
+    
+    
+    }
+    
     
 
     
