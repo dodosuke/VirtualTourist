@@ -11,7 +11,7 @@ import CoreData
 
 extension VTCollectionViewController {
     
-    func storePhotos(image: UIImage?, location: Location) {
+    func storePhotos(image: UIImage?, location: Location) -> FlickrImages {
         
         let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let stack = delegate.stack
@@ -19,13 +19,14 @@ extension VTCollectionViewController {
         fr.sortDescriptors = [NSSortDescriptor(key: "image", ascending: true)]
         let fetchedResultsController = NSFetchedResultsController(fetchRequest: fr, managedObjectContext: stack.context, sectionNameKeyPath: nil, cacheName: nil)
         
-        let _ = FlickrImages(image: UIImagePNGRepresentation(image!)!, location:location, context: fetchedResultsController.managedObjectContext)
+        let newPhoto = FlickrImages(image: UIImagePNGRepresentation(image!)!, location:location, context: fetchedResultsController.managedObjectContext)
         
         stack.save()
+        return newPhoto
         
     }
     
-    func getPhotos(location: Location) -> [FlickrImages] {
+    func loadPhotos(location: Location) -> [FlickrImages?] {
         
         let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let stack = delegate.stack
@@ -36,7 +37,13 @@ extension VTCollectionViewController {
             let results: Array = try stack.context.executeFetchRequest(fr)
             if results.count > 0  {
                 
-                let photos = results as! [FlickrImages]
+                var photos: [FlickrImages?] = []
+                
+                for i in 0...results.count-1 {
+                    let photo = results[i] as! FlickrImages
+                    photos.append(photo)
+                }
+                
                 return photos
                 
             }
@@ -44,11 +51,11 @@ extension VTCollectionViewController {
             print("READ ERROR:\(error.localizedDescription)")
         }
         
-        return []
+        return [FlickrImages?](count:21, repeatedValue: nil)
         
     }
     
-    func deletePhoto(photos: [FlickrImages]) {
+    func deletePhoto(photos: [FlickrImages?]) {
         
         let delegate: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let stack = delegate.stack
@@ -59,7 +66,7 @@ extension VTCollectionViewController {
             let results: Array = try stack.context.executeFetchRequest(fr)
             if results.count > 0 {
                 for photo in photos {
-                    stack.context.deleteObject(photo)
+                    stack.context.deleteObject(photo!)
                     stack.save()
                 }
             }

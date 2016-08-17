@@ -51,6 +51,8 @@ class VTMapViewController: UIViewController, MKMapViewDelegate {
     }
     
     func mapView(mapView: MKMapView, didSelectAnnotationView view: MKAnnotationView) {
+    
+        mapView.deselectAnnotation(view.annotation, animated: true)
         
         let location:Location = findLocation(view.annotation!.coordinate.latitude, lon: view.annotation!.coordinate.longitude)!
         
