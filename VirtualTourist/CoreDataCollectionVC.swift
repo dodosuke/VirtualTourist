@@ -43,9 +43,7 @@ extension VTCollectionViewController {
                 for i in 0...results.count-1 {
                     photos[i] = results[i] as? FlickrImages
                 }
-                
                 return photos
-                
             }
         } catch let error as NSError {
             print("READ ERROR:\(error.localizedDescription)")

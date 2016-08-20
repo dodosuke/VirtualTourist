@@ -107,6 +107,7 @@ extension VTMapViewController {
         } catch let error as NSError {
             print("FETCH ERROR:\(error.localizedDescription)")
         }
+        
     }
     
 }
