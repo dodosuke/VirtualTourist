@@ -24,7 +24,7 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
     var myPin: MKAnnotation?
     var location: Location?
 
-    var photos: [FlickrImages?] = []
+    var photos: [Int:FlickrImages] = [:]
     var selectedCells:[Bool] = []
     
     override func viewDidLoad() {
@@ -41,28 +41,20 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
         photos = loadPhotos(location!)
         selectedCells = [Bool](count:21, repeatedValue:false)
         
-//      For formatting the collection view
-        let space: CGFloat = 3.0
-        let dimension: CGFloat = (view.frame.size.width - (2 * space)) / 3.0
-        flowLayout.minimumInteritemSpacing = space
-        flowLayout.minimumLineSpacing = space
-        flowLayout.itemSize = CGSizeMake(dimension, dimension)
-        
-//      For mapview
-        let myCoordinate = myPin!.coordinate
-        let myLatDist : CLLocationDistance = 1000
-        let myLonDist : CLLocationDistance = 1000
-        let myRegion: MKCoordinateRegion = MKCoordinateRegionMakeWithDistance(myCoordinate, myLatDist, myLonDist);
-        mapView.setRegion(myRegion, animated: true)
-        mapView.addAnnotation(myPin!)
+        collectionViewFormat()
+        displayMap()
 
     }
     
     
     func collectionView(collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         
-        return photos.count
-        
+        if photos.count == 0 {
+            return 21
+        } else {
+            return photos.count
+        }
+
     }
     
     func collectionView(collectionView: UICollectionView, cellForItemAtIndexPath indexPath: NSIndexPath) -> UICollectionViewCell {
@@ -77,29 +69,27 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
             cell.alpha = 1.0
         }
         
-        if let storedImage = photos[indexPath.row] {
-            if cell.photoImageView.image == nil {
-                cell.photoImageView.image = UIImage(data: storedImage.image!)! as UIImage
-            }
+        if let photo = photos[indexPath.row] {
+            cell.photoImageView.image = UIImage(data: photo.image!)
             
         } else {
             
-            cell.activityIndicator.alpha = 1.0
-            cell.activityIndicator.startAnimating()
-            cell.userInteractionEnabled = false
+            dispatch_async(dispatch_get_main_queue(), {() -> Void in
+                cell.activityIndicator.alpha = 1.0
+                cell.activityIndicator.startAnimating()
+                cell.userInteractionEnabled = false
+            })
             
             FlickrClient.sharedInstance().displayImageFromFlickrBySearch(lat!, lon:lon!) {(image, errorString) in
                 if errorString == nil {
                     dispatch_async(dispatch_get_main_queue(), {() -> Void in
                         cell.photoImageView.image = image!
+                        self.photos[indexPath.row] = self.storePhotos(image, location: self.location!)
+                        print(self.photos.count)
                         
                         cell.activityIndicator.alpha = 0.0
                         cell.activityIndicator.stopAnimating()
                         cell.userInteractionEnabled = true
-                        
-                        let newPhoto = self.storePhotos(image, location: self.location!)
-                        self.photos[indexPath.row] = newPhoto
-
                     })
                 } else {
                     cell.labelForError.text = "No image"
@@ -143,10 +133,27 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
             } else {
                 collectionButton.setTitle("Remove Selected Photo(s)", forState: .Normal)
             }
-            
-
-            
         }
+    }
+    
+    private func collectionViewFormat() {
+        
+        let space: CGFloat = 3.0
+        let dimension: CGFloat = (view.frame.size.width - (2 * space)) / 3.0
+        flowLayout.minimumInteritemSpacing = space
+        flowLayout.minimumLineSpacing = space
+        flowLayout.itemSize = CGSizeMake(dimension, dimension)
+    
+    }
+    
+    private func displayMap() {
+        
+        let myCoordinate = myPin!.coordinate
+        let myLatDist : CLLocationDistance = 1000
+        let myLonDist : CLLocationDistance = 1000
+        let myRegion: MKCoordinateRegion = MKCoordinateRegionMakeWithDistance(myCoordinate, myLatDist, myLonDist);
+        mapView.setRegion(myRegion, animated: true)
+        mapView.addAnnotation(myPin!)
         
     }
     
@@ -159,24 +166,29 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
     
     @IBAction func pressCollectionButton(sender: AnyObject) {
         
-        var photosForDelete: [FlickrImages?] = []
+        var photosForDelete: [FlickrImages] = []
+        var newPhotos: [Int:FlickrImages] = [:]
+        var newIndex: Int = 0
         
         if collectionButton.titleLabel!.text == "New Collection" {
-            photosForDelete = photos
-        } else if collectionButton.titleLabel!.text == "Remove Selected Photo(s)" {
-            for i in 0...photos.count-1 {
-                if selectedCells[i] {
-                    photosForDelete.append(photos[i])
-                }
-            }
+            selectedCells = [Bool](count:21, repeatedValue:true)
         }
         
-        deletePhoto(photosForDelete)
+        for i in 0...photos.count-1 {
+            if selectedCells[i] {
+                photosForDelete.append(photos[i]!)
+            } else {
+                newPhotos[newIndex] = photos[i]!
+                newIndex += 1
+            }
+        }
+
+        deletePhoto(photosForDelete, location: location!)
         
+        photos = newPhotos
         selectedCells = [Bool](count:21, repeatedValue:false)
         collectionButton.setTitle("New Collection", forState: .Normal)
         collectionView.reloadData()
-        
     }
     
 }

@@ -26,22 +26,22 @@ extension VTCollectionViewController {
         
     }
     
-    func loadPhotos(location: Location) -> [FlickrImages?] {
+    func loadPhotos(location: Location) -> [Int:FlickrImages] {
         
         let delegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let stack = delegate.stack
         let fr = NSFetchRequest(entityName: "FlickrImages")
+        fr.sortDescriptors = [NSSortDescriptor(key: "image", ascending: true)]
         fr.predicate = NSPredicate(format: "photos = %@", argumentArray: [location])
         
         do {
             let results: Array = try stack.context.executeFetchRequest(fr)
             if results.count > 0  {
                 
-                var photos: [FlickrImages?] = []
+                var photos: [Int:FlickrImages] = [:]
                 
                 for i in 0...results.count-1 {
-                    let photo = results[i] as! FlickrImages
-                    photos.append(photo)
+                    photos[i] = results[i] as? FlickrImages
                 }
                 
                 return photos
@@ -51,22 +51,24 @@ extension VTCollectionViewController {
             print("READ ERROR:\(error.localizedDescription)")
         }
         
-        return [FlickrImages?](count:21, repeatedValue: nil)
+        return [:]
         
     }
     
-    func deletePhoto(photos: [FlickrImages?]) {
+    func deletePhoto(photos: [FlickrImages], location: Location) {
         
         let delegate: AppDelegate = UIApplication.sharedApplication().delegate as! AppDelegate
         let stack = delegate.stack
         let fr = NSFetchRequest(entityName: "FlickrImages")
+        fr.sortDescriptors = [NSSortDescriptor(key: "image", ascending: true)]
+        fr.predicate = NSPredicate(format: "photos = %@", argumentArray: [location])
         fr.returnsObjectsAsFaults = false
         
         do {
             let results: Array = try stack.context.executeFetchRequest(fr)
             if results.count > 0 {
                 for photo in photos {
-                    stack.context.deleteObject(photo!)
+                    stack.context.deleteObject(photo)
                     stack.save()
                 }
             }
