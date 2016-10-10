@@ -35,18 +35,16 @@ class VTMapViewController: UIViewController, MKMapViewDelegate {
     
     func recognizeLongPress(sender: UILongPressGestureRecognizer) {
         
-        if sender.state != UIGestureRecognizerState.Began {
-            return
-        }
+        if sender.state == UIGestureRecognizerState.Began {
+            
+            let location = sender.locationInView(mapView)
+            let myCoordinate: CLLocationCoordinate2D = mapView.convertPoint(location, toCoordinateFromView: mapView)
+            let myPin: MKPointAnnotation = MKPointAnnotation()
+            myPin.coordinate = myCoordinate
+            mapView.addAnnotation(myPin)
+            setLocation(myCoordinate.latitude, lon: myCoordinate.longitude)
         
-        let location = sender.locationInView(mapView)
-        
-        let myCoordinate: CLLocationCoordinate2D = mapView.convertPoint(location, toCoordinateFromView: mapView)
-        let myPin: MKPointAnnotation = MKPointAnnotation()
-        myPin.coordinate = myCoordinate
-        mapView.addAnnotation(myPin)
-        
-        setLocation(myCoordinate.latitude, lon: myCoordinate.longitude)
+        } 
         
     }
     
@@ -60,10 +58,11 @@ class VTMapViewController: UIViewController, MKMapViewDelegate {
             mapView.removeAnnotation(view.annotation!)
             deleteLocation(location)
         } else {
-            recallCollectionView(view, location: location)
+            callCollectionView(view, location: location)
         }
 
     }
+    
     
     @IBAction func changeMode(sender: AnyObject) {
         
@@ -78,7 +77,7 @@ class VTMapViewController: UIViewController, MKMapViewDelegate {
         }
     }
     
-    private func recallCollectionView(view: MKAnnotationView, location: Location) {
+    private func callCollectionView(view: MKAnnotationView, location: Location) {
         
         let myPin = view.annotation!
         let collectionViewer = storyboard!.instantiateViewControllerWithIdentifier("VTCollectionViewController") as! VTCollectionViewController

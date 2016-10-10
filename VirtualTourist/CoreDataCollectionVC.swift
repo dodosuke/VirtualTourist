@@ -32,7 +32,7 @@ extension VTCollectionViewController {
         let stack = delegate.stack
         let fr = NSFetchRequest(entityName: "FlickrImages")
         fr.sortDescriptors = [NSSortDescriptor(key: "image", ascending: true)]
-        fr.predicate = NSPredicate(format: "photos = %@", argumentArray: [location])
+       
         
         do {
             let results: Array = try stack.context.executeFetchRequest(fr)

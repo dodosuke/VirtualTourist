@@ -74,15 +74,15 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
             
         } else {
             
-            dispatch_async(dispatch_get_main_queue(), {() -> Void in
+            dispatch_async(dispatch_get_main_queue()) {
                 cell.activityIndicator.alpha = 1.0
                 cell.activityIndicator.startAnimating()
                 cell.userInteractionEnabled = false
-            })
+            }
             
             FlickrClient.sharedInstance().displayImageFromFlickrBySearch(lat!, lon:lon!) {(image, errorString) in
                 if errorString == nil {
-                    dispatch_async(dispatch_get_main_queue(), {() -> Void in
+                    dispatch_async(dispatch_get_main_queue()) {
                         cell.photoImageView.image = image!
                         self.photos[indexPath.row] = self.storePhotos(image, location: self.location!)
                         print(self.photos.count)
@@ -90,7 +90,7 @@ class VTCollectionViewController: UIViewController, UICollectionViewDelegate, UI
                         cell.activityIndicator.alpha = 0.0
                         cell.activityIndicator.stopAnimating()
                         cell.userInteractionEnabled = true
-                    })
+                    }
                 } else {
                     cell.labelForError.text = "No image"
                 }
